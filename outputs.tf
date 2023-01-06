@@ -18,6 +18,6 @@ output "k8s_cluster_ca_certificate" {
 */
 
 output "k8s_endpoint" {
-  description = "IP address of Kubernetes cluster master"
+  description = "IP address of Kubernetes cluster API server endpoint"
   value       = module.k8s-infra.k8s_endpoint
 }
