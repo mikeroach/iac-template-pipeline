@@ -6,6 +6,9 @@ resource "google_container_cluster" "k8s_cluster" {
   subnetwork               = var.subnetwork
   remove_default_node_pool = false
   initial_node_count       = var.initial_node_count
+  logging_service          = "none" # GKE-managed fluentbit requests too much memory for e2-micro instances
+  #monitoring_service       = none
+
   // https://github.com/hashicorp/terraform-provider-google/issues/2231
   master_authorized_networks_config {
     cidr_blocks {
