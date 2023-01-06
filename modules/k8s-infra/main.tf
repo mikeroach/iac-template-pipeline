@@ -1,13 +1,3 @@
-resource "random_string" "k8s_cluster_admin_user" {
-  length  = 16
-  special = false
-}
-
-resource "random_password" "k8s_cluster_admin_pass" {
-  length  = 32
-  special = true
-}
-
 resource "google_container_cluster" "k8s_cluster" {
   name                     = "${var.gcp_project_shortname}-k8s-cluster"
   location                 = var.gcp_zone
@@ -16,8 +6,24 @@ resource "google_container_cluster" "k8s_cluster" {
   subnetwork               = var.subnetwork
   remove_default_node_pool = false
   initial_node_count       = var.initial_node_count
+  logging_service          = "none" # GKE-managed fluentbit requests too much memory for e2-micro instances
+  #monitoring_service       = none
 
-  //master_authorized_networks_config = "FIXME"
+  // https://github.com/hashicorp/terraform-provider-google/issues/2231
+  master_authorized_networks_config {
+    cidr_blocks {
+      cidr_block   = "0.0.0.0/0"
+      display_name = "everywhere"
+    }
+  }
+
+  /* These secondary range names for VPC-native cluster addressing are
+  statically defined for now - see network module for details. */
+  ip_allocation_policy {
+    use_ip_aliases                = true
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
 
   maintenance_policy {
     daily_maintenance_window {
@@ -26,9 +32,6 @@ resource "google_container_cluster" "k8s_cluster" {
   }
 
   master_auth {
-    username = random_string.k8s_cluster_admin_user.result
-    password = random_password.k8s_cluster_admin_pass.result
-
     client_certificate_config {
       issue_client_certificate = false
     }

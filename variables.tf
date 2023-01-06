@@ -79,7 +79,7 @@ variable "k8s_initial_node_count" {
 variable "k8s_machine_type" {
   type        = string
   description = "Specifies the GCP machine type of Kubernetes node(s)"
-  default     = "g1-small"
+  default     = "e2-micro"
 }
 
 variable "k8s_preemptible" {

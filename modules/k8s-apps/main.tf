@@ -10,7 +10,7 @@ module "k8s-config" {
 }
 
 module "service-aphorismophilia" {
-  source                            = "github.com/mikeroach/aphorismophilia-terraform?ref=v12"
+  source                            = "github.com/mikeroach/aphorismophilia-terraform?ref=v17"
   dns_domain                        = var.dns_domain
   dns_hostname                      = var.gcp_project_shortname
   dockerhub_credentials             = var.dockerhub_credentials
