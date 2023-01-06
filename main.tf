@@ -9,15 +9,19 @@ locals {
   project_id      = "${data.terraform_remote_state.iac_bootstrap.outputs.project_ids["${var.gcp_project_shortname}"]}"
   service_account = jsondecode(file(var.gcp_credentials)).client_email
 }
+
+/* TODO: Rewrite provider definitions as required_providers so we can define
+or override provider versions in per-environment module instantiation. */
+
 provider "google" {
   version     = "2.14.0"
-  credentials = "${file(var.gcp_credentials)}"
+  credentials = file(var.gcp_credentials)
   region      = var.gcp_region
 }
 
 provider "google-beta" {
   version     = "2.14.0"
-  credentials = "${file(var.gcp_credentials)}"
+  credentials = file(var.gcp_credentials)
   region      = var.gcp_region
 }
 
