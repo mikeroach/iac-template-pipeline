@@ -35,7 +35,7 @@ pipeline {
         }
         stage('Build Environment') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 sh label: 'Run Terraform apply', script: 'make environment'
@@ -43,7 +43,7 @@ pipeline {
         }
         stage('Integration Tests') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 sleep(time:30, unit:"SECONDS") // Wait 30 seconds for DDNS daemon set to register new address, if applicable.
@@ -52,7 +52,7 @@ pipeline {
         }
         stage('Tag Module Release') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'GitHub_Jenkins-GCP', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
@@ -81,7 +81,7 @@ pipeline {
                      description: 'All tests passed',
                      targetUrl: "${env.BUILD_URL}/display/redirect")
 
-                    // Attempt to auto-merge this PR into master unless the 'no-merge' label exists to indicate otherwise.
+                    // Attempt to auto-merge this PR into main unless the 'no-merge' label exists to indicate otherwise.
                     if (! pullRequest.labels.contains("no-merge")) {
                         echo "No-merge label absent; attempting auto-merge."
 
