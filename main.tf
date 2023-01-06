@@ -1,6 +1,13 @@
 /* This root module manages the submodules and resources for a composed
 Infrastructure as Code Template Stack. See README.md for details. */
 
+/* Interpolating the GCP project ID directly into a data source lookup
+this way requires a map output type in the upstream module. I wasn't able
+to successfully concatenate the data source lookup + variable inline since
+Terraform interpreted it as a string instead of variable reference. */
+locals {
+  project_id      = "${data.terraform_remote_state.iac_bootstrap.outputs.project_ids["${var.gcp_project_shortname}"]}"
+}
 provider "google" {
   version     = "2.14.0"
   credentials = "${file(var.gcp_credentials)}"
@@ -52,14 +59,6 @@ data "terraform_remote_state" "iac_bootstrap" {
     prefix      = var.iac_bootstrap_tfstate_prefix
     credentials = var.iac_bootstrap_tfstate_credentials
   }
-}
-
-/* Interpolating the GCP project ID directly into a data source lookup
-this way requires a map output type in the upstream module. I wasn't able
-to successfully concatenate the data source lookup + variable inline since
-Terraform interpreted it as a string instead of variable reference. */
-locals {
-  project_id = "${data.terraform_remote_state.iac_bootstrap.outputs.project_ids["${var.gcp_project_shortname}"]}"
 }
 
 /* Create network infrastructure in a submodule.
