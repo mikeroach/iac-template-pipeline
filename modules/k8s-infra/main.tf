@@ -6,6 +6,13 @@ resource "google_container_cluster" "k8s_cluster" {
   subnetwork               = var.subnetwork
   remove_default_node_pool = false
   initial_node_count       = var.initial_node_count
+  // https://github.com/hashicorp/terraform-provider-google/issues/2231
+  master_authorized_networks_config {
+    cidr_blocks {
+      cidr_block   = "0.0.0.0/0"
+      display_name = "everywhere"
+    }
+  }
 
   /* These secondary range names for VPC-native cluster addressing are
   statically defined for now - see network module for details. */
