@@ -17,6 +17,6 @@ I was inspired to experiment with this approach by Kief Morris' [Template Stack 
 
 1. IaC engineer develops and tests locally in feature branch.
 1. IaC engineer commits feature branch and submits pull request.
-1. Jenkins examines pull request, runs Terraform validation tests, then merges into master upon success. **Note this test suite is only abbreviated in feature branch/PRs to save time for this learning project - remember to run full tests during PR/branch builds in real use cases to keep master stable.**
-1. Jenkins examines master branch, repeats validation tests, builds described infrastructure, runs integration tests, destroys test infrastructure, and tags new release upon success.
+1. Jenkins examines pull request, runs Terraform validation tests, then merges into `main` upon success. **Note this test suite is only abbreviated in feature branch/PRs to save time for this learning project - remember to run full tests during PR/branch builds in real use cases to keep `main` stable.**
+1. Jenkins examines `main` branch, repeats validation tests, builds described infrastructure, runs integration tests, destroys test infrastructure, and tags new release upon success.
 1. Service and environment owners update their ephemeral pipelines and persistent definitions with new version tag.
