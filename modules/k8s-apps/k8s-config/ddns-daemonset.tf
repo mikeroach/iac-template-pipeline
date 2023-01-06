@@ -72,9 +72,13 @@ resource "kubernetes_daemonset" "gandi_ddns" {
           }
 
           resources {
-            limits {
+            requests = {
+              cpu    = "10m"
+              memory = "5Mi"
+            }
+            limits = {
               cpu    = "100m"
-              memory = "20Mi"
+              memory = "5Mi"
             }
           }
 
