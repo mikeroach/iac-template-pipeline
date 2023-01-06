@@ -1,13 +1,3 @@
-resource "random_string" "k8s_cluster_admin_user" {
-  length  = 16
-  special = false
-}
-
-resource "random_password" "k8s_cluster_admin_pass" {
-  length  = 32
-  special = true
-}
-
 resource "google_container_cluster" "k8s_cluster" {
   name                     = "${var.gcp_project_shortname}-k8s-cluster"
   location                 = var.gcp_zone
@@ -26,9 +16,6 @@ resource "google_container_cluster" "k8s_cluster" {
   }
 
   master_auth {
-    username = random_string.k8s_cluster_admin_user.result
-    password = random_password.k8s_cluster_admin_pass.result
-
     client_certificate_config {
       issue_client_certificate = false
     }

@@ -7,6 +7,7 @@ to successfully concatenate the data source lookup + variable inline since
 Terraform interpreted it as a string instead of variable reference. */
 locals {
   project_id      = "${data.terraform_remote_state.iac_bootstrap.outputs.project_ids["${var.gcp_project_shortname}"]}"
+  service_account = jsondecode(file(var.gcp_credentials)).client_email
 }
 provider "google" {
   version     = "2.14.0"
@@ -28,25 +29,33 @@ provider "random" {
   version = "2.2"
 }
 
+/* FIXME: Migrate each environment to use project-specific service
+account for authentication to Google provider with IAM managed via
+Terraform. In the meantime, this depends on org-wide permissions
+imperatively granted to the Project Factory Seed Service account
+outside of Terraform (this happens in upstream for other privileges
+via local-exec provisioner):
+
+gcloud organizations add-iam-policy-binding ${ORG_ID} --member="serviceAccount:${SA_ID}" --role="roles/iam.serviceAccountTokenCreator"
+*/
+
+data "google_service_account_access_token" "cluster_access_sa" {
+  target_service_account = local.service_account
+  scopes                 = ["userinfo-email", "cloud-platform"]
+  lifetime               = "3600s"
+}
+
 provider "kubernetes" {
   version = "1.9.0"
-  /* Using basic auth avoids the need to either bundle the gcloud +
-  k8s tool suites with our Jenkins instance or build a custom tools
-  helper container image for now.
-
-  I ended up baking the Google Cloud SDK into my Jenkins container
+  /* Using token-based auth via service account requires the Google
+  Cloud SDK available to our Jenkins instance, which we install
   anyway due to obnoxious local-exec helper script dependencies in
   third party registry modules. */
-  host             = "https://${module.k8s-infra.k8s_endpoint}/"
-  username         = module.k8s-infra.k8s_cluster_admin_user
-  password         = module.k8s-infra.k8s_cluster_admin_pass
-  insecure         = true
-  load_config_file = false
-  /* Commented out to use implicit kubectl-configured authentication.
-  cluster_ca_certificate = module.k8s.k8s_cluster_ca_certificate
-  client_certificate     = "${module.k8s.k8s_client_certificate}"
-  client_key             = "${module.k8s.k8s_client_key}"
-  */
+  host                   = "https://${module.k8s-infra.k8s_endpoint}/"
+  load_config_file       = false
+  token                  = data.google_service_account_access_token.cluster_access_sa.access_token
+  cluster_ca_certificate = base64decode("${module.k8s-infra.k8s_cluster_ca_certificate}")
+
 }
 
 /* Pull outputs from the IaC bootstrap module's state. Fortunately, this
