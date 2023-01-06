@@ -7,7 +7,13 @@ resource "google_container_cluster" "k8s_cluster" {
   remove_default_node_pool = false
   initial_node_count       = var.initial_node_count
 
-  //master_authorized_networks_config = "FIXME"
+  /* These secondary range names for VPC-native cluster addressing are
+  statically defined for now - see network module for details. */
+  ip_allocation_policy {
+    use_ip_aliases                = true
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
 
   maintenance_policy {
     daily_maintenance_window {
