@@ -50,16 +50,18 @@ data "google_service_account_access_token" "cluster_access_sa" {
 }
 
 provider "kubernetes" {
-  version = "1.9.0"
+  version = "2.16.1"
   /* Using token-based auth via service account requires the Google
   Cloud SDK available to our Jenkins instance, which we install
   anyway due to obnoxious local-exec helper script dependencies in
   third party registry modules. */
   host                   = "https://${module.k8s-infra.k8s_endpoint}/"
-  load_config_file       = false
   token                  = data.google_service_account_access_token.cluster_access_sa.access_token
   cluster_ca_certificate = base64decode("${module.k8s-infra.k8s_cluster_ca_certificate}")
 
+  ignore_annotations = [
+    "^cloud.google.com\\/neg.*",
+  ]
 }
 
 /* Pull outputs from the IaC bootstrap module's state. Fortunately, this
